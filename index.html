@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>JS网页动态气泡背景插件</title>
+ 
+	 
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- <div class="overlay">
+        <h3>点击下面的图片来查看不同的气泡背景效果</h3>
+        <div class="examples">
+            <div class="example"><img data-config-nr="0" src="img/config0.png"></div>
+            <div class="example"><img data-config-nr="1" src="img/config1.png"></div>
+            <div class="example"><img data-config-nr="2" src="img/config2.png"></div>
+            <div class="example"><img data-config-nr="3" src="img/config3.png"></div>
+        </div>
+    </div> -->
+	
+	<!-- <script src="dist/bubbly-bg.js"></script> -->
+	<script>window.bubbly = function (config) {
+		const c = config || {};
+		const r = () => Math.random();
+		const canvas = c.canvas || document.createElement("canvas");
+		let width = canvas.width;
+		let height = canvas.height;
+		if (canvas.parentNode === null) {
+			canvas.setAttribute("style", "position:fixed;z-index:-1;left:0;top:0;min-width:100vw;min-height:100vh;");
+			width = canvas.width = window.innerWidth;
+			height = canvas.height = window.innerHeight;
+			document.body.appendChild(canvas);
+		}
+		const context = canvas.getContext("2d");
+		context.shadowColor = c.shadowColor || "#fff";
+		context.shadowBlur = c.blur || 4;
+		const gradient = context.createLinearGradient(0, 0, width, height);
+		gradient.addColorStop(0, c.colorStart || "#2AE");
+		gradient.addColorStop(1, c.colorStop || "#17B");
+		const nrBubbles = c.bubbles || Math.floor((width + height) * 0.02);
+		const bubbles = [];
+		for (let i = 0; i < nrBubbles; i++) {
+			bubbles.push({
+				f: (c.bubbleFunc || (() => `hsla(0, 0%, 100%, ${r() * 0.1})`)).call(), // fillStyle
+				x: r() * width, // x-position
+				y: r() * height, // y-position
+				r: 4 + (r() * width / 25), // radius
+				a: r() * Math.PI * 2, // angle
+				v: 0.1 + r() * 0.5 // velocity
+			});
+		}
+		(function draw() {
+			if (canvas.parentNode === null) {
+				return cancelAnimationFrame(draw)
+			}
+			if (c.animate !== false) {
+				requestAnimationFrame(draw);
+			}
+			context.globalCompositeOperation = "source-over";
+			context.fillStyle = gradient;
+			context.fillRect(0, 0, width, height);
+			context.globalCompositeOperation = c.compose || "lighter";
+			bubbles.forEach(bubble => {
+				context.beginPath();
+				context.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+				context.fillStyle = bubble.f;
+				context.fill();
+				// update positions for next draw
+				bubble.x += Math.cos(bubble.a) * bubble.v;
+				bubble.y += Math.sin(bubble.a) * bubble.v;
+				if (bubble.x - bubble.r > width) {
+					bubble.x = -bubble.r;
+				}
+				if (bubble.x + bubble.r < 0) {
+					bubble.x = width + bubble.r;
+				}
+				if (bubble.y - bubble.r > height) {
+					bubble.y = -bubble.r;
+				}
+				if (bubble.y + bubble.r < 0) {
+					bubble.y = height + bubble.r;
+				}
+			});
+		})();
+	};
+	</script>
+	    <script>
+	        bubbly();
+	        let configs = [
+	            {},
+	            {
+	                colorStart: "#111",
+	                colorStop: "#422",
+	                bubbleFunc: () => `hsla(0, 100%, 50%, ${Math.random() * 0.25})`
+	            },
+	            {
+	                colorStart: "#4c004c",
+	                colorStop: "#1a001a",
+	                bubbleFunc: () => `hsla(${Math.random() * 360}, 100%, 50%, ${Math.random() * 0.25})`
+	            },
+	            {
+	                colorStart: "#fff4e6",
+	                colorStop: "#ffe9e4",
+	                blur: 1,
+	                compose: "source-over",
+	                bubbleFunc: () => `hsla(${Math.random() * 50}, 100%, 50%, .3)`
+	            }
+	        ];
+	        document.addEventListener("click", function (e) {
+	            if (e.target.hasAttribute("data-config-nr")) {
+	                document.body.removeChild(document.querySelector("canvas"));
+	                bubbly(configs[e.target.getAttribute("data-config-nr")]);
+	            }
+	        });
+	    </script>
+</body>
+</html>
+<!--下面是无用代码-->
+<a href="http://www.bootstrapmb.com" style="display:none">bootstrapmb</a>
